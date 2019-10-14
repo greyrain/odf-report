@@ -2,6 +2,9 @@ require 'rubygems'
 require 'zip'
 require 'fileutils'
 require 'nokogiri'
+require 'marcel'
+require 'fastimage'
+require 'securerandom'
 
 require File.expand_path('../odf-report/parser/default',  __FILE__)
 

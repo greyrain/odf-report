@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 module ODFReport
   class Template
 
-    CONTENT_FILES = ['content.xml', 'styles.xml']
+    CONTENT_FILES = ['content.xml', 'styles.xml'].freeze
+    MANIFEST_PATH = 'META-INF/manifest.xml'
 
     attr_accessor :output_stream
 
@@ -38,6 +41,23 @@ module ODFReport
           @output_stream.write data
 
         end
+      end
+
+    end
+
+    def update_manifest(&block)
+
+      entry = get_template_entries.detect { |entry| entry.name == MANIFEST_PATH }
+
+      entry.get_input_stream do |is|
+
+        data = is.sysread
+
+        process_entry(data, &block)
+
+        @output_stream.put_next_entry(entry.name)
+        @output_stream.write data
+
       end
 
     end

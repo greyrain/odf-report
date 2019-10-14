@@ -11,7 +11,7 @@ class Report
     @fields = []
     @tables = []
     @images = {}
-    @image_names_replacements = {}
+    @image_names_additions = []
     @sections = []
 
     yield(self) if block_given?
@@ -68,6 +68,26 @@ class Report
       end
 
       include_image_files(file)
+
+      file.update_manifest do |manifest|
+        @image_names_additions.each do |image|
+          media_type = Marcel::MimeType.for(name: ::File.basename(image[:path]))
+          full_path = image[:template_image]
+          node_set = Nokogiri::XML::NodeSet.new(manifest)
+          image = Nokogiri::XML::Node.new('file-entry', manifest)
+          image.namespace = manifest.root.children.to_a[1].namespace
+
+          image['full-path'] = full_path
+          image.attributes['full-path'].namespace = manifest.root.children.to_a[1].namespace
+
+          image['media-type'] = media_type
+          image.attributes['media-type'].namespace = manifest.root.children.to_a[1].namespace
+
+          node_set << image
+          node_set << Nokogiri::XML::Text.new("\n ", manifest)
+          manifest.root.first_element_child.before(node_set)
+        end
+      end
 
     end
 
